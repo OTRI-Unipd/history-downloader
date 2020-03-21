@@ -7,6 +7,7 @@ If an error occurs it prints the last ticker that was downloaded successfully to
 from pathlib import Path
 import av_downloader
 import json
+import time
 
 SUBDIR = 'av_historical_1m'
 
@@ -33,13 +34,30 @@ def bulk_av_download_1min(key, symbols):
     '''
     SLEEP_TIME = 15
     subdir = Path(Path.cwd(), SUBDIR)
+    log_path = Path(subdir, 'result_log.txt')
     avd = av_downloader.AVDownloader(key, subdir)
+    
     for symbol in symbols:
         result = avd.download(symbol)
-        print('Downloaded ' + symbol + "to " + str(result))
+        if result:
+            msg = 'Downloaded ' + symbol + ' to ' + str(result) + '\n'
+            log_result(log_path, msg)
+            print(msg)
+        else:
+            msg = 'No data found for ' + symbol + '\n';
+            log_result(log_path, msg)
+            print(msg)
         time.sleep(SLEEP_TIME)
-        with Path(subdir, 'last_downloaded.txt').open('a') as log:
-            log.write('Last downloaded symbol is ' + symbol)
+
+def log_result(log_path, msg):
+    '''Append a message to a file
+
+    Keyword arguments:
+    log_path -- the Path to the log file
+    msg -- the message to append to the file
+    '''
+    with log_path.open('a') as log:
+        log.write(msg)
 
 if __name__ == '__main__':
 
