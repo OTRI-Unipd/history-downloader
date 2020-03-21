@@ -38,7 +38,7 @@ def bulk_av_download_1min(key, symbols):
         result = avd.download(symbol)
         print('Downloaded ' + symbol + "to " + str(result))
         time.sleep(SLEEP_TIME)
-        with Path(subdir, 'last_downloaded.txt').open('w+') as log:
+        with Path(subdir, 'last_downloaded.txt').open('a') as log:
             log.write('Last downloaded symbol is ' + symbol)
 
 if __name__ == '__main__':
