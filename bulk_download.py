@@ -98,4 +98,4 @@ if __name__ == '__main__':
 
         for symbol in symbols:
             print(symbol)
-            yf_downloader.downloadLastWeek(symbol)
+            yf_downloader.download_last_week(symbol)
