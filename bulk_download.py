@@ -97,5 +97,5 @@ if __name__ == '__main__':
         yf_downloader = YFinanceDownloader(dir_path)
 
         for symbol in symbols:
-            print(symbol)
+            print("Downloading: {}".format(symbol))
             yf_downloader.download_last_week(symbol)

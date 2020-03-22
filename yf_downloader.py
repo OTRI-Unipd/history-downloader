@@ -39,7 +39,7 @@ class YFinanceDownloader:
         '''
         json_filepath = Path(self.files_directory, self.__output_JSON_filename(ticker, start_date, end_date))
 
-        yf_data = yf.download(ticker, start = self.__yahoo_time_format(start_date), end = self.__yahoo_time_format(end_date), interval = interval, round  = False)
+        yf_data = yf.download(ticker, start = self.__yahoo_time_format(start_date), end = self.__yahoo_time_format(end_date), interval = interval, round  = False, progress = False)
 
         # If no data is downloaded it means that the ticker couldn't be found or there has been an error, we're not creating any output file then.
         if yf_data.empty:
