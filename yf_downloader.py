@@ -15,7 +15,7 @@ class YFinanceDownloader:
         '''Init method.
 
         Keyword arguments:
-        dir_path -- string, the absolute path of the directory, file names will be concatenated directly.
+        dir_path -- Path
         '''
         self.dir_path = dir_path
     
@@ -37,4 +37,19 @@ class YFinanceDownloader:
 
         yf_data = yf.download(ticker, start=seven_days_ago_string, end=today_string, interval = "1m")
 
-        json_filepath.open("w+").write(jsbeautifier.beautify(yf_data.to_json(orient="table")))
+        if yf_data.empty == False:
+
+            json_filepath.open("w+").write(jsbeautifier.beautify(yf_data.to_json(orient="table")))
+            return json_filepath
+
+        return False
+
+if __name__ == '__main__':
+    dir_path = Path('yf_historical_1m')
+    dir_path.mkdir(exist_ok=True)
+    symbol = input("Symbol: ")
+    result = YFinanceDownloader(dir_path).downloadLastWeek(symbol)
+    if result:
+        print('Saved output to: {}'.format(result))
+    else:
+        print('No data found for symbol {}'.format(symbol))
