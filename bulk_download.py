@@ -91,7 +91,7 @@ if __name__ == '__main__':
         symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
         symbols = symbols_from_dict_list(companies, symbol_key)
 
-        dir_path = Path('yf_historical_1m')
+        dir_path = Path('data','yf_historical_1m')
         dir_path.mkdir(exist_ok=True)
 
         yf_downloader = YFinanceDownloader(dir_path)

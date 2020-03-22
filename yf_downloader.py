@@ -45,7 +45,7 @@ class YFinanceDownloader:
         return False
 
 if __name__ == '__main__':
-    dir_path = Path('yf_historical_1m')
+    dir_path = Path('data','yf_historical_1m')
     dir_path.mkdir(exist_ok=True)
     symbol = input("Symbol: ")
     result = YFinanceDownloader(dir_path).downloadLastWeek(symbol)
