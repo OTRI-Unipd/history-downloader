@@ -23,7 +23,7 @@ class YFinanceDownloader:
         '''
         self.files_directory = files_directory
     
-    def download_minimum_interval(self, ticker : str, start_date : date, end_date : date):
+    def download_dates(self, ticker : str, start_date : date, end_date : date, interval : str = "1d"):
         '''
         Downloads quote data for a single ticker given the start date and end date.
 
@@ -33,11 +33,11 @@ class YFinanceDownloader:
             start_datetime : datetime
                 Must be before end_datetime.
             end_datetime : datetime
-                Must be after start_datetime
+                Must be after start_datetime.
+            interval : str
+                Could be "1m" (7 days max); "2m", "5m", "15m", "30m", "90m" (60 days max); "60m", "1h" (730 days max); "1d", "5d", "1wk"
         '''
         json_filepath = Path(self.files_directory, self.__output_JSON_filename(ticker, start_date, end_date))
-
-        interval = self.__calc_minimum_interval(start_date)
 
         yf_data = yf.download(ticker, start = self.__yahoo_time_format(start_date), end = self.__yahoo_time_format(end_date), interval = interval, round  = False)
 
@@ -47,6 +47,21 @@ class YFinanceDownloader:
 
         json_filepath.open("w+").write(yf_data.to_json(orient="table", indent = 4))
         return json_filepath
+
+    def download_minimum_interval(self, ticker : str, start_date : date, end_date : date):
+        '''
+        Downloads quote data for a single ticker given the start date and end date, using the smallest interval
+        available for the given dates.
+
+        Parameters:
+            ticker : str
+                The simbol to download data of.
+            start_datetime : datetime
+                Must be before end_datetime.
+            end_datetime : datetime
+                Must be after start_datetime.
+        '''
+        return self.download_dates(ticker, start_date, end_date, self.__calc_minimum_interval(start_date))
 
 
     def download_last_week(self, ticker : str):
@@ -104,6 +119,6 @@ class YFinanceDownloader:
         elif days_difference <= 60:
             return "2m"
         elif days_difference <= 730:
-            return "1g"
+            return "1h"
         else:
             return "1d"
