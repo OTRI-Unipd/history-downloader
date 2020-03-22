@@ -48,7 +48,7 @@ class AVDownloader:
                 return ""
 
 if __name__ == '__main__':
-    dir_path = Path(Path.cwd(), 'av_historical_1m')
+    dir_path = Path('/av_historical_1m')
     key = input("Key: ")
     symbol = input("Symbol: ")
     result = AVDownloader(key, dir_path).download(symbol)
