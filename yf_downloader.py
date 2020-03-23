@@ -2,10 +2,10 @@
 Classes:
 YFinanceDownloader -- Download all kind of data from Yahoo Finance
 '''
-import yfinance as yf
-from pandas import  DataFrame
 from pathlib import Path
 from datetime import date, timedelta
+from pandas import  DataFrame
+import yfinance as yf
 
 
 class YFinanceDownloader:
@@ -23,7 +23,7 @@ class YFinanceDownloader:
                 Existing system directory where to put JSON output files in.
         '''
         self.files_directory = files_directory
-    
+
     def download_period(self, ticker : str, period : str, interval : str = "1d"):
         '''
         Downloads quote data for a single ticker given a period of time from today.
@@ -36,7 +36,7 @@ class YFinanceDownloader:
             interval : str
                 Could be "1m" (7 days max); "2m", "5m", "15m", "30m", "90m" (60 days max); "60m", "1h" (730 days max); "1d", "5d", "1wk"
         '''
-        yf_data = yf.download(ticker, period = period, interval = interval, round  = False, progress = False)
+        yf_data = yf.download(ticker, period=period, interval=interval, round=False, progress=False)
 
         # If no data is downloaded it means that the ticker couldn't be found or there has been an error, we're not creating any output file then.
         if yf_data.empty:
@@ -106,7 +106,7 @@ class YFinanceDownloader:
                 Downloaded data with yf.download()
         '''
         json_filepath = Path(self.files_directory, json_filename)
-        json_filepath.open("w+").write(yf_data.to_json(orient="table", indent = 4))
+        json_filepath.open("w+").write(yf_data.to_json(orient="table", indent=4))
         return json_filepath
 
 # Functions
