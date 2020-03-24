@@ -6,6 +6,7 @@ If an error occurs it prints the last ticker that was downloaded successfully to
 '''
 from pathlib import Path
 import av_downloader
+from yf_downloader import YFinanceDownloader
 import json
 import time
 
@@ -61,19 +62,40 @@ def log_result(log_path, msg):
 
 if __name__ == '__main__':
 
-    print(Path.cwd())
+    api_choice = input("Aplha Vantage or Yahoo finance? A/Y")
 
-    av_key = input('Insert your Alpha Vantage api key: ')
+    if(api_choice == "A"):
+        av_key = input('Insert your Alpha Vantage api key: ')
 
-    file_name = input('Input file should be a local JSON file\nInput file name: ')
-    file_content = {}
-    with open(file_name) as f:
-        file_content = json.load(f)
-    
-    list_key = input('What\'s the list\'s key? ')
-    companies = file_content[list_key]
-    
-    symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
-    symbols = symbols_from_dict_list(companies, symbol_key)
+        file_name = input('Input file should be a local JSON file\nInput file name: ')
+        file_content = {}
+        with open(file_name) as f:
+            file_content = json.load(f)
+        
+        list_key = input('What\'s the list\'s key? ')
+        companies = file_content[list_key]
+        
+        symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
+        symbols = symbols_from_dict_list(companies, symbol_key)
 
-    bulk_av_download_1min(av_key, symbols)
+        bulk_av_download_1min(av_key, symbols)
+    elif(api_choice == "Y"):
+        file_name = input('Input file should be a local JSON file\nInput file name: ')
+        file_content = {}
+        with open(file_name) as f:
+            file_content = json.load(f)
+        
+        list_key = input('What\'s the list\'s key? ')
+        companies = file_content[list_key]
+        
+        symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
+        symbols = symbols_from_dict_list(companies, symbol_key)
+
+        dir_path = Path('data', 'yf_historical_1m')
+        dir_path.mkdir(exist_ok=True)
+
+        yf_downloader = YFinanceDownloader(dir_path)
+
+        for symbol in symbols:
+            print("Downloading: {}".format(symbol))
+            yf_downloader.download_last_week(symbol)
