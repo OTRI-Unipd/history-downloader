@@ -7,6 +7,65 @@ from datetime import date, timedelta
 from pandas import  DataFrame
 import yfinance as yf
 
+# Functions
+
+def __yahoo_time_format(date : date):
+    '''
+    Formats time into yfinance-ready string format for start date and end date.
+
+    Parameters:
+        date : datetime.date
+            Date to be formatted for yfinance start and end times.
+    '''
+    return date.strftime("%Y-%m-%d")
+
+def __output_JSON_filename_dates(ticker : str, start_date : date, end_date : date):
+    '''
+    Generates the JSON output file's name using ticker, data start date and end date.
+
+    Parameters:
+        ticker : str
+            Output ticker's name.
+        start_datetime : datetime
+            Beginning date of output data.
+        end_datetime : datetime
+            End date of output data.
+    '''
+    return "{}_{}_to_{}.json".format(ticker, end_date.strftime("%d-%m-%y"), start_date.strftime("%d-%m-%y"))
+
+def __output_JSON_filename_period(ticker : str, period : str):
+    '''
+    Generates the JSON output file's name using ticker and period of time.
+
+    Parameters:
+        ticker : str
+            Output ticker's name.
+        period : str
+            Yahoo's period of time
+    '''
+    return "{}_{}_{}.json".format(ticker, date.today().strftime("%d-%m-%y"), period)
+
+def __calc_minimum_interval(start_date : date):
+    '''
+    Calculates the shortest interval (from 1min to 1day) allowed for the given interval. For the calculation we only need the start datetime because
+    it depends on how old is the wanted data.
+
+    Parameters:
+        start_datetime: datetime
+            Beginning date of wanted data.
+
+    Returns: The correct shortest yfinance interval
+    '''
+    days_difference = (date.today() - start_date).days
+
+    if days_difference <= 7:
+        return "1m"
+    elif days_difference <= 60:
+        return "2m"
+    elif days_difference <= 730:
+        return "1h"
+    else:
+        return "1d"
 
 class YFinanceDownloader:
     '''
@@ -108,63 +167,3 @@ class YFinanceDownloader:
         json_filepath = Path(self.files_directory, json_filename)
         json_filepath.open("w+").write(yf_data.to_json(orient="table", indent=4))
         return json_filepath
-
-# Functions
-
-def __yahoo_time_format(date : date):
-    '''
-    Formats time into yfinance-ready string format for start date and end date.
-
-    Parameters:
-        date : datetime.date
-            Date to be formatted for yfinance start and end times.
-    '''
-    return date.strftime("%Y-%m-%d")
-
-def __output_JSON_filename_dates(ticker : str, start_date : date, end_date : date):
-    '''
-    Generates the JSON output file's name using ticker, data start date and end date.
-
-    Parameters:
-        ticker : str
-            Output ticker's name.
-        start_datetime : datetime
-            Beginning date of output data.
-        end_datetime : datetime
-            End date of output data.
-    '''
-    return "{}_{}_to_{}.json".format(ticker, end_date.strftime("%d-%m-%y"), start_date.strftime("%d-%m-%y"))
-
-def __output_JSON_filename_period(ticker : str, period : str):
-    '''
-    Generates the JSON output file's name using ticker and period of time.
-
-    Parameters:
-        ticker : str
-            Output ticker's name.
-        period : str
-            Yahoo's period of time
-    '''
-    return "{}_{}_{}.json".format(ticker, date.today().strftime("%d-%m-%y"), period)
-
-def __calc_minimum_interval(start_date : date):
-    '''
-    Calculates the shortest interval (from 1min to 1day) allowed for the given interval. For the calculation we only need the start datetime because
-    it depends on how old is the wanted data.
-
-    Parameters:
-        start_datetime: datetime
-            Beginning date of wanted data.
-
-    Returns: The correct shortest yfinance interval
-    '''
-    days_difference = (date.today() - start_date).days
-
-    if days_difference <= 7:
-        return "1m"
-    elif days_difference <= 60:
-        return "2m"
-    elif days_difference <= 730:
-        return "1h"
-    else:
-        return "1d"
