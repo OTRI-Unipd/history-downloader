@@ -6,6 +6,7 @@ If an error occurs it prints the last ticker that was downloaded successfully to
 '''
 from pathlib import Path
 import av_downloader
+from datetime import datetime
 from yf_downloader import YFinanceDownloader
 import json
 import time
@@ -82,6 +83,7 @@ if __name__ == '__main__':
     elif(api_choice == "Y"):
         file_name = input('Input file should be a local JSON file\nInput file name: ')
         file_content = {}
+
         with open(file_name) as f:
             file_content = json.load(f)
         
@@ -91,10 +93,15 @@ if __name__ == '__main__':
         symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
         symbols = symbols_from_dict_list(companies, symbol_key)
 
-        dir_path = Path('data', 'yf_historical_1m')
-        dir_path.mkdir(exist_ok=True)
+        yahoo_dir = Path('data', 'yf_historical_1m')
+        yahoo_dir.mkdir(exist_ok=True)
 
-        yf_downloader = YFinanceDownloader(dir_path)
+        now = datetime.now()
+        
+        data_path = Path(yahoo_dir, now.strftime("%M_%H-%d_%m_%y"))
+        data_path.mkdir(exist_ok=True)
+
+        yf_downloader = YFinanceDownloader(data_path)
 
         for symbol in symbols:
             print("Downloading: {}".format(symbol))
