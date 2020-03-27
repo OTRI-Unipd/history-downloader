@@ -129,7 +129,7 @@ class YFinanceDownloader:
             end_datetime : datetime
                 End date of output data.
         '''
-        return "{}_{}_to_{}.json".format(ticker, end_date.strftime("%d-%m-%y"), start_date.strftime("%d-%m-%y"))
+        return "{}_{}_to_{}.json".format(ticker, start_date.strftime("%d-%m-%y"), end_date.strftime("%d-%m-%y"))
 
     @staticmethod
     def __output_JSON_filename_period(ticker : str, period : str):

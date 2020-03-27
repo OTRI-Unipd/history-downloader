@@ -6,7 +6,7 @@ If an error occurs it prints the last ticker that was downloaded successfully to
 '''
 from pathlib import Path
 import av_downloader
-from datetime import datetime
+from datetime import datetime, date
 from yf_downloader import YFinanceDownloader
 import json
 import time
@@ -88,8 +88,6 @@ def make_dir(dir_name : str, parent_path : Path = None):
 
 if __name__ == '__main__':
 
-    api_choice = input("Aplha Vantage or Yahoo finance? A/Y ")
-
     symbols_file_path = None
 
     while True: # Wait until a correct name is given
@@ -106,6 +104,8 @@ if __name__ == '__main__':
     symbols = symbols_from_dict_list(rows, DOCS_TICKER)
 
     data_dir = make_dir('data')
+
+    api_choice = input("Aplha Vantage or Yahoo finance? A/Y ")
 
     if(api_choice == "A"):
         api_key = load_config('alphavantage_api_key')
@@ -124,17 +124,36 @@ if __name__ == '__main__':
     elif(api_choice == "Y"):
         yahoo_dir = make_dir('YahooFinance', parent_path=data_dir)
 
-        now = datetime.now()
+        history_choice = input("Last week or given dates? W/D ")
+
+        if(history_choice == "W"):
+
+            data_path = make_dir("{}_last_week".format(datetime.now().strftime("%H-%M_%d-%m-%y")), parent_path=yahoo_dir)
+
+            yf_downloader = YFinanceDownloader(data_path)
+
+            for symbol in symbols:
+                result = yf_downloader.download_last_week(symbol)
+                if result:
+                    log_ok("YF", symbol)
+                else:
+                    log_fail("YF", symbol)
+        elif(history_choice == "D"):
+            start_date = datetime.strptime(input("Start date (d-m-y): "), "%d-%m-%y").date()
+            end_date = datetime.strptime(input("End date (d-m-y): "), "%d-%m-%y").date()
+
+            data_path = make_dir("{}_{}-{}".format(datetime.now().strftime("%H-%M_%d-%m-%y"), start_date, end_date), parent_path=yahoo_dir)
+
+            yf_downloader = YFinanceDownloader(data_path)
+
+            for symbol in symbols:
+                result = yf_downloader.download_minimum_interval(symbol, start_date, end_date)
+                if result:
+                    log_ok("YF", symbol)
+                else:
+                    log_fail("YF", symbol)
+        else:
+            print("None selected")
         
-        data_path = make_dir(now.strftime("%H-%M_%d-%m-%y"), parent_path=yahoo_dir)
-
-        yf_downloader = YFinanceDownloader(data_path)
-
-        for symbol in symbols:
-            print("Downloading: {}".format(symbol))
-            result = yf_downloader.download_last_week(symbol)
-            if result:
-                log_ok("YF", symbol)
-            else:
-                log_fail("YF", symbol)
-                
+    else:
+        print("None selected")
