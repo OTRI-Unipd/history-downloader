@@ -12,6 +12,12 @@ import json
 import time
 
 SUBDIR = 'av_historical_1m'
+CONFIG_FILE_NAME = 'config.json'
+DOCS_DIRECTORY = 'docs'
+DOCS_ROOT = 'tickers'
+DOCS_TICKER = 'ticker'
+AV_SLEEP_TIME = 15
+LOG_FILE = 'log.txt'
 
 def symbols_from_dict_list(data, key):
     '''Parses a list of dictionaries (like a JSON array) into a list of symbols
@@ -21,88 +27,114 @@ def symbols_from_dict_list(data, key):
     key -- the key for the symbol in the list\'s items.
     '''
     symbols = []
-    for company in data:
-        symbols.append(company[key])
+    for row in data:
+        symbols.append(row[key])
     return symbols
 
-def bulk_av_download_1min(key, symbols):
-    '''Downloads 1min-interval historical data for a list of symbols and waits for 15 seconds in between each one
-    
-    If some error happens when downloading a symbol then it is reported in an \"error_log-txt\" file in the current working directory
-
-    Keyword arguments:
-    key -- Alpha Vantage api key
-    symbols -- a list of string symbols
-    '''
-    SLEEP_TIME = 15
-    subdir = Path(Path.cwd(), SUBDIR)
-    log_path = Path(subdir, 'result_log.txt')
-    avd = av_downloader.AVDownloader(key, subdir)
-    
-    for symbol in symbols:
-        result = avd.download(symbol)
-        if result:
-            msg = 'Downloaded ' + symbol + ' to ' + str(result) + '\n'
-            log_result(log_path, msg)
-            print(msg)
-        else:
-            msg = 'No data found for ' + symbol + '\n';
-            log_result(log_path, msg)
-            print(msg)
-        time.sleep(SLEEP_TIME)
-
-def log_result(log_path, msg):
+def log_result(msg : str):
     '''Append a message to a file
 
-    Keyword arguments:
-    log_path -- the Path to the log file
-    msg -- the message to append to the file
+    Parameters:
+        msg
+            The message to append to the file
     '''
-    with log_path.open('a') as log:
-        log.write(msg)
+    Path(LOG_FILE).open('a+').write("{} {}\n".format(datetime.now().strftime("%H:%M:%S %d-%m-%Y"), msg))
+
+def log_ok(service : str, symbol : str):
+    msg = "{} - Downloaded {}".format(service,symbol)
+    log_result(msg)
+    print(msg)
+
+def log_fail(service : str, symbol : str):
+    msg = "{} - Failed to download {}".format(service,symbol)
+    log_result(msg)
+    print(msg)
+
+def load_config(config_key : str):
+    '''
+    Opens configuration file to retrieve the key
+
+    Parameters:
+        config_key : str
+            The key to load from a json file
+    '''
+    config_file = Path(CONFIG_FILE_NAME)
+
+    if(config_file.exists() == False):
+        print("Missing config.js file, see documentation for informations about format")
+        exit()
+
+    config_content = json.load(config_file.open(mode="r"))
+
+    value = config_content[config_key]
+    if(value is None):
+        print("Missing alphavantage_api_key in config file")
+        exit()
+        
+    return value
+
+def list_docs():
+    docs_path = Path(DOCS_DIRECTORY).rglob('*.json')
+    files = [x.name.replace('.json','') for x in docs_path if x.is_file()]
+    return files
+
+def make_dir(dir_name : str, parent_path : Path = None):
+    if parent_path is None:
+        path = Path(dir_name)
+    else:
+        path = Path(parent_path, dir_name)
+    path.mkdir(exist_ok=True)
+    return path
 
 if __name__ == '__main__':
 
-    api_choice = input("Aplha Vantage or Yahoo finance? A/Y")
+    api_choice = input("Aplha Vantage or Yahoo finance? A/Y ")
+
+    symbols_file_path = None
+
+    while True: # Wait until a correct name is given
+        symbols_file_name = input('Choose a file from the following: {} '.format(list_docs()))
+        symbols_file_path = Path(DOCS_DIRECTORY, "{}.json".format(symbols_file_name))
+        if(symbols_file_path.exists()==True):
+            break
+        else:
+            print("File name {} doesn't exist".format(symbols_file_name))
+
+    symbols_file_content = json.load(symbols_file_path.open("r"))
+    
+    rows = symbols_file_content[DOCS_ROOT]
+    symbols = symbols_from_dict_list(rows, DOCS_TICKER)
+
+    data_dir = make_dir('data')
 
     if(api_choice == "A"):
-        av_key = input('Insert your Alpha Vantage api key: ')
+        api_key = load_config('alphavantage_api_key')
+        av_dir = make_dir('AlphaVantage', parent_path=data_dir)
 
-        file_name = input('Input file should be a local JSON file\nInput file name: ')
-        file_content = {}
-        with open(file_name) as f:
-            file_content = json.load(f)
-        
-        list_key = input('What\'s the list\'s key? ')
-        companies = file_content[list_key]
-        
-        symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
-        symbols = symbols_from_dict_list(companies, symbol_key)
+        av_downloader = av_downloader.AVDownloader(api_key, av_dir)
 
-        bulk_av_download_1min(av_key, symbols)
+        for symbol in symbols:
+            result = av_downloader.download(symbol)
+            if result:
+                log_ok("AV", symbol)
+            else:
+                log_fail("AV", symbol)
+            time.sleep(AV_SLEEP_TIME)
+
     elif(api_choice == "Y"):
-        file_name = input('Input file should be a local JSON file\nInput file name: ')
-        file_content = {}
-
-        with open(file_name) as f:
-            file_content = json.load(f)
-        
-        list_key = input('What\'s the list\'s key? ')
-        companies = file_content[list_key]
-        
-        symbol_key = input('What\'s the key for the symbol in the list\'s items? ')
-        symbols = symbols_from_dict_list(companies, symbol_key)
-
-        yahoo_dir = Path('data', 'yf_historical_1m')
-        yahoo_dir.mkdir(exist_ok=True)
+        yahoo_dir = make_dir('YahooFinance', parent_path=data_dir)
 
         now = datetime.now()
         
-        data_path = Path(yahoo_dir, now.strftime("%M_%H-%d_%m_%y"))
-        data_path.mkdir(exist_ok=True)
+        data_path = make_dir(now.strftime("%H-%M_%d-%m-%y"), parent_path=yahoo_dir)
 
         yf_downloader = YFinanceDownloader(data_path)
 
         for symbol in symbols:
             print("Downloading: {}".format(symbol))
-            yf_downloader.download_last_week(symbol)
+            result = yf_downloader.download_last_week(symbol)
+            if result:
+                log_ok("YF", symbol)
+            else:
+                log_fail("YF", symbol)
+                
