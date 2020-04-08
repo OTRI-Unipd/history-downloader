@@ -13,25 +13,30 @@ import json
 class AVDownloader:
     '''
     '''
-    def __init__(self, key, dir_path):
-        '''Init method.
-
-        Keyword arguments:
-        key -- string, the Alpha Vantage API key to use
-        dir_path -- string, the absolute path of the directory, file names will be concatenated directly.
+    def __init__(self, key : str, dir_path : Path):
+        '''
+        Init method.
+        Parameters:
+            key : str
+                the Alpha Vantage API key to use
+            dir_path : Path
+                The Path object representing the destination folder, file names will be concatenated directly.
         '''
         self.ts = TimeSeries(key)
         self.dir_path = dir_path
     
-    def download(self, symbol, interval='1min'):
-        '''Downloads data for a single symbol.
-
-        Downloads the full record of the TimeSeries Alpha Vantage api and stores the result in a file, returnin its name.
+    def download(self, symbol : str, interval='1min'):
+        '''
+        Downloads data for a single symbol.
+        Downloads the full record of the TimeSeries Alpha Vantage api and stores the result in a file, returning the output file.
         The name will be: 'symbol_interval.json'. Ignores a symbol that returns no data, and returns an empty string in that case.
 
-        Keyword arguments:
-        symbol -- string, the symbol for which to download data.
-        interval -- string, the interval of the data, see Alpha Vantage for allowed intervals (default '1m')
+        Parameters:
+            symbol : str
+                The symbol for which to download data.
+            interval : str
+                The interval of the data, see Alpha Vantage for allowed intervals (default '1m')
+        Returns: The Path to the output file or None if no data could be found.
         '''
 
         time_now = datetime.now()
@@ -41,14 +46,20 @@ class AVDownloader:
         
         try:
             data, meta = self.ts.get_intraday(symbol, interval=interval, outputsize='full')
+            # The meta retrieved here are not what we want
+            meta = {}
+            meta['ticker'] = symbol
+            meta['interval'] = interval
+            data['metadata'] = meta
             with file_path.open('w+') as result_file:
                 json.dump(data, result_file, indent=4)
             return file_path
         except ValueError:
-                return ""
+                return None
 
 if __name__ == '__main__':
     dir_path = Path('/av_historical_1m')
+    dir_path.mkdir(exist_ok=True)
     key = input("Key: ")
     symbol = input("Symbol: ")
     result = AVDownloader(key, dir_path).download(symbol)
