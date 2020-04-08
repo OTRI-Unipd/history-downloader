@@ -27,6 +27,8 @@ for file_name in list_jsons("{}/{}/{}".format(DATA_DIRECTORY,service_folder_name
     file_path = Path(DATA_DIRECTORY,service_folder_name,chosen_folder_name,file_name + ".json")
     json_contents = json.load(file_path.open("r"))
     filename_split = file_name.split("_")
-    json_contents['ticker'] = filename_split[0]
-    json_contents['interval'] = "1m"
+    meta = dict()
+    meta['ticker'] = filename_split[0]
+    meta['interval'] = "1m"
+    json_contents['metadata'] = meta
     file_path.open("w+").write(json.dumps(json_contents, indent=4))

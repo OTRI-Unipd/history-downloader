@@ -36,7 +36,7 @@ class YFinanceDownloader:
             interval : str
                 Could be "1m" (7 days max); "2m", "5m", "15m", "30m", "90m" (60 days max); "60m", "1h" (730 days max); "1d", "5d", "1wk"
         '''
-        yf_data = yf.download(ticker, period=period, interval=interval, round=False, progress=False)
+        yf_data = yf.download(ticker, period=period, interval=interval, round=False, progress=False, prepost = True)
 
         # If no data is downloaded it means that the ticker couldn't be found or there has been an error, we're not creating any output file then.
         if yf_data.empty:
@@ -59,7 +59,7 @@ class YFinanceDownloader:
                 Could be "1m" (7 days max); "2m", "5m", "15m", "30m", "90m" (60 days max); "60m", "1h" (730 days max); "1d", "5d", "1wk"
         '''
 
-        yf_data = yf.download(ticker, start=YFinanceDownloader.__yahoo_time_format(start_date), end=YFinanceDownloader.__yahoo_time_format(end_date), interval=interval, round=False, progress=False)
+        yf_data = yf.download(ticker, start=YFinanceDownloader.__yahoo_time_format(start_date), end=YFinanceDownloader.__yahoo_time_format(end_date), interval=interval, round=False, progress=False, prepost = True)
 
         # If no data is downloaded it means that the ticker couldn't be found or there has been an error, we're not creating any output file then.
         if yf_data.empty:
@@ -110,9 +110,11 @@ class YFinanceDownloader:
                 Interval resolution data has been downloaded
         '''
         json_filepath = Path(self.files_directory, json_filename)
-        json_dict = json.loads(yf_data.to_json(orient="table", indent=4))
-        json_dict['ticker'] = ticker_name
-        json_dict['interval'] = interval
+        json_dict = json.loads(yf_data.to_json(orient="table"))
+        meta = dict()
+        meta['ticker'] = ticker_name
+        meta['interval'] = interval
+        json_dict['metadata'] = meta
         json_filepath.open("w+").write(json.dumps(json_dict, indent=4))
         return json_filepath
 
