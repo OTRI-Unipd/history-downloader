@@ -42,7 +42,7 @@ class YFinanceDownloader:
         if yf_data.empty:
             return False
 
-        return self.__write_on_JSON_file(YFinanceDownloader.__output_JSON_filename_period(ticker, period), yf_data, ticker)
+        return self.__write_on_JSON_file(YFinanceDownloader.__output_JSON_filename_period(ticker, period), yf_data, ticker, interval)
 
     def download_dates(self, ticker : str, start_date : date, end_date : date, interval : str = "1d"):
         '''
@@ -65,7 +65,7 @@ class YFinanceDownloader:
         if yf_data.empty:
             return False
 
-        return self.__write_on_JSON_file(YFinanceDownloader.__output_JSON_filename_dates(ticker, start_date, end_date), yf_data, ticker)
+        return self.__write_on_JSON_file(YFinanceDownloader.__output_JSON_filename_dates(ticker, start_date, end_date), yf_data, ticker, interval)
 
     def download_minimum_interval(self, ticker : str, start_date : date, end_date : date):
         '''
@@ -96,7 +96,7 @@ class YFinanceDownloader:
 
         return self.download_minimum_interval(ticker, seven_days_ago, today)
 
-    def __write_on_JSON_file(self, json_filename : str, yf_data : DataFrame, ticker_name : str):
+    def __write_on_JSON_file(self, json_filename : str, yf_data : DataFrame, ticker_name : str, interval : str):
         '''
         Creates a new file in the files_directory and fills it with tabled Dataframe with the ticker's name added
         Parameters:
@@ -106,10 +106,13 @@ class YFinanceDownloader:
                 Downloaded data with yf.download()
             ticker_name : str
                 Ticker name to be added to the output json file
+            interval : str
+                Interval resolution data has been downloaded
         '''
         json_filepath = Path(self.files_directory, json_filename)
         json_dict = json.loads(yf_data.to_json(orient="table", indent=4))
         json_dict['ticker'] = ticker_name
+        json_dict['interval'] = interval
         json_filepath.open("w+").write(json.dumps(json_dict, indent=4))
         return json_filepath
 
