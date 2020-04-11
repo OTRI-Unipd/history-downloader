@@ -114,6 +114,7 @@ class YFinanceDownloader:
         meta = dict()
         meta['ticker'] = ticker_name
         meta['interval'] = interval
+        meta['provider'] = "yahoo finance"
         json_dict['metadata'] = meta
         json_filepath.open("w+").write(json.dumps(json_dict, indent=4))
         return json_filepath
