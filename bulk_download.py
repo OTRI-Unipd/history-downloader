@@ -111,7 +111,8 @@ if __name__ == '__main__':
         api_key = load_config('alphavantage_api_key')
         av_dir = make_dir('AlphaVantage', parent_path=data_dir)
 
-        av_downloader = av_downloader.AVDownloader(api_key, av_dir)
+        data_path = make_dir("{}_last_week".format(datetime.now().strftime("%H-%M_%d-%m-%y")), parent_path=av_dir)
+        av_downloader = av_downloader.AVDownloader(api_key, data_path)
 
         for symbol in symbols:
             result = av_downloader.download(symbol)
