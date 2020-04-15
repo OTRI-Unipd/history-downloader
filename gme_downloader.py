@@ -18,7 +18,7 @@ class GMEDownloader:
                 "Liquidita",
                 "Transiti",
                 "Fabbisogno",
-                "OfferteIntegrativeGrtn"
+                "OfferteIntegrativeGrtn",
                 "Prezzi",
                 "MarketCoupling"
             ]
@@ -88,6 +88,30 @@ class GMEDownloader:
         }
     ]}
 
+    def get_everything_date(self, day : date, ignore_errors : bool = False):
+        '''
+        Downloads everything from every known GME source for a given day.
+
+        Parameters:
+            day : date
+                Any date between 2009 circa and today, depends on the type of data.
+            ignore_errors : bool
+                If the method should stop on errors or just go on to download the rest.
+        Raises:
+            ValueError when required data could not be retrieved (wrong date, req_type or even missing data).
+        Returns:
+            A list of strings containing downloaded XML files.
+        '''
+        data = list()
+        for category in self.DICTIONARY['categories']:
+            for req_type in category['types']:
+                try:
+                    data.append(self.get_data(category['name'], req_type, day))
+                except ValueError as error:
+                    if ignore_errors == False:
+                        raise ValueError(error)
+        return data
+
     def get_MGP(self, req_type: str, day: date):
         '''
         Downloads data from MGP
@@ -99,7 +123,9 @@ class GMEDownloader:
             date : date
                 Any date between 2009 circa and today, depends on the type of data.
         Raises:
-            ValueError when required data could not be retrieved (wrong date or req_type)
+            ValueError when required data could not be retrieved (wrong date or req_type).
+        Returns:
+            Retrieved XML file as a string.
         '''
         return self.get_data("MGP",req_type, day)
 
@@ -113,7 +139,9 @@ class GMEDownloader:
             date : date
                 Any date between 2009 circa and today, depends on the type of data.
         Raises:
-            ValueError when required data could not be retrieved (wrong date or req_type)
+            ValueError when required data could not be retrieved (wrong date or req_type).
+        Returns:
+            Retrieved XML file as a string.
         '''
         return self.get_data("MI{}".format(number), req_type, day)
 
@@ -129,7 +157,9 @@ class GMEDownloader:
             day : date
                 Any date between 2009 circa and today, depends on category and date.
         Raises:
-            ValueError when required data could not be retrieved (wrong date, category or req_type)
+            ValueError when required data could not be retrieved (wrong date, category or req_type).
+        Returns:
+            Retrieved XML file as a string.
         '''
         session = requests.Session()
         post_data = {
@@ -152,6 +182,5 @@ class GMEDownloader:
             return response.text
         raise ValueError("Required value could not be found ({}, {}, {})".format(category, req_type, day))
 
-
 downloader = GMEDownloader()
-print(downloader.get_MGP("StimeFabbisogno", date(2020,4,17)))
+print(downloader.get_everything_day(date(2020,4,11), ignore_errors=False))
