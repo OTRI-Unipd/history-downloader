@@ -1,31 +1,59 @@
 import requests
 from datetime import date
 
-COOKIE_GMEITALIANO = "73121C41475ED92C082815C756EF486AEDB084515F184617CD3E736CBA2E1633BB5ED56855453D5599AA5CCFEC57CD70680B6541DA0654E94B6B5334DB04380FCBD154AA7B815603F909F96E2756D9E299D4F4F1AAB3B92694C27D3EF310D8D1AE0ADD7AD08C66B54A426D22068C1688CAB6B03B1483F67B2FA69202AEF21D22A7600AA867D1E101CD17A015061BA2A56250EF00DEF77F871FC486DA3EE2AB84"
 
 class GMEDownloader:
     '''
     Downloads all kind of data from https://www.mercatoelettrico.org/
     '''
 
-    def MGP_informazioni_preliminari(self, category : str, day : date):
+    def MGP_informazioni_preliminari(self, req_type: str, day: date):
         '''
         Downloads data from MGP/informazioni preliminari/category
 
         Parameters:
-            category : str
+            type : str
                 Must be one of the following: "StimeFabbisogno", "LimitiTransito", "PrezziConvenzionali"
             date : date
                 Any date between 2009 circa and today, depends on the type of data.
         '''
+        return self.__get_data("MGP",req_type, day)
+
+    def __get_data(self, category: str, req_type: str, day: date):
+        '''
+        Prepares request with necessary cookies and post data to bypass required conditions.
+
+        Parameters:
+            category : str
+                Could be "MGP" or "MI1" to "MI7".
+            type : str
+                Depends on the category, could be "Prezzi" or "Quantita" or "Fabbisogno" and more.
+            day : date
+                Any date between 2009 circa and today, depends on category and date.
+        Raises:
+            ValueError when required data could not be retrieved (wrong date, category or type)
+        '''
         session = requests.Session()
         jar = requests.cookies.RequestsCookieJar()
-        jar.set("GmeItaliano",COOKIE_GMEITALIANO)
+        jar.set("ASP.NET_SessionId", "sqv5qb5aeydcc1sjjuzlshlx")
         session.cookies = jar
-
+        post_data = {
+            '__VIEWSTATE': '/wEPDwULLTIwNTEyNDQzNzQPZBYCZg9kFgICAw9kFgJmD2QWBAIMD2QWAmYPZBYCZg9kFgICCQ8PZBYCHgpvbmtleXByZXNzBRxyZXR1cm4gaW52aWFQV0QodGhpcyxldmVudCk7ZAIVD2QWAgIBDw8WAh4NT25DbGllbnRDbGljawUmamF2YXNjcmlwdDp3aW5kb3cub3BlbignP3N0YW1wYT10cnVlJylkZBgBBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WBQUMY3RsMDAkSW1hZ2UxBRJjdGwwMCRJbWFnZUJ1dHRvbjEFIGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkc3RhbXBhBSRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXIxJENCQWNjZXR0bzEFJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlcjEkQ0JBY2NldHRvMvV5e94ExnpHUcybAr1bPdOOHxYDHpQG7fgAyUlbfpUy',
+            # '__VIEWSTATEGENERATOR' : 'BD5243C0',
+            # '__PREVIOUSPAGE' : 'cZ9asoMdEhcsdMTrKLddyuDgUqrpgV44mkItwJfPMdC5pTBV2YSxs8G-heXd_cSe0LgJT2dUbmEwn5EAxW2CKqwwsuEEvSwkj_TDS8XqtiFWyG906u2-XjhdXsqvVULm0',
+            '__EVENTVALIDATION': '/wEdABN5QfIZ0Z09c70NXWGRJiGpcS/s8I39AyxLz4tn+AkBiEW+okpiqwYG+B4aTa9o+s43drX32rKpFiwqoHxZnWEOD4zZrxX92uOlyIx1SyGTQmV8haT0EfVomfKCKov4HgnZl/Xwcz7QqxVnz+OmFVuWzNBM98trssXld5dD73vgQX4H/0z/058uP3NmytG8PXozrkfQ7SmiPGgdsZPdEEV8g/gu4+zhSeI0ttI2ADLh/wU7Nz/6FKjnm2sSszw4FMr8VEDvc+zuMc1oKpjHdCosjDu35o5CUn6umW4JNpE1p4raaQaFnXKaLuO1sKRm4e9ZUwtJIYRkZxZmb4HmgHR6ltkgVwReXnm+EHOYvXjKP0Sd1PBpsO2hEyKj10xH8juA+rwVNruExpEBEKBupGsoUlq8qqob2Hte6ABdfJHWar0vp/uG8tjo+1et9YAPjLg=',
+            # 'ctl00$tbTitolo': 'cerca nel sito',
+            # 'ctl00$UserName': '',
+            # 'ctl00$Password': '',
+            'ctl00$ContentPlaceHolder1$CBAccetto1': 'on',
+            'ctl00$ContentPlaceHolder1$CBAccetto2': 'on',
+            'ctl00$ContentPlaceHolder1$Button1': 'Accetto',
+        }
         formatted_date = day.strftime("%Y%m%d")
-        r = session.get('https://www.mercatoelettrico.org/It/WebServerDataStore/MGP_{}/{}MGP{}.xml'.format(category, formatted_date, category))
-        print(r.text)
+        url = "https://www.mercatoelettrico.org/It/Tools/Accessodati.aspx?ReturnUrl=/It/WebServerDataStore/{}_{}/{}{}{}.xml".format(
+            category, req_type, formatted_date, category, req_type)
+        response = session.post(url, data=post_data)
+        if(response.status_code == 200):
+            return response.text
+        raise ValueError("Required value could not be found ({}, {}, {})".format(category, req_type, day))
 
-downloader = GMEDownloader()
-downloader.MGP_informazioni_preliminari("StimeFabbisogno", date.today())
