@@ -50,7 +50,7 @@ class AVDownloader:
             meta = {}
             meta['ticker'] = symbol
             meta['interval'] = interval
-            meta['provider'] = "yahoo finance"
+            meta['provider'] = "alpha vantage"
             data['metadata'] = meta
             with file_path.open('w+') as result_file:
                 json.dump(data, result_file, indent=4)
