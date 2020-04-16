@@ -183,6 +183,6 @@ class GMEDownloader:
         raise ValueError("Required value could not be found ({}, {}, {})".format(
             category, req_type, day))
 
-
-downloader = GMEDownloader()
-print(downloader.get_everything_date(date(2020, 4, 11), ignore_errors=False))
+if __name__ == '__main__':
+    downloader = GMEDownloader()
+    print(downloader.get_everything_date(date(2020, 4, 11), ignore_errors=False))
