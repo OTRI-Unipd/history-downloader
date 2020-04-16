@@ -1,5 +1,5 @@
-import requests
 from datetime import date
+import requests
 
 
 class GMEDownloader:
@@ -7,10 +7,10 @@ class GMEDownloader:
     Downloads all kind of data from https://www.mercatoelettrico.org/
     '''
 
-    DICTIONARY = { "categories" :[
+    DICTIONARY = {"categories": [
         {
-            "name" : "MGP",
-            "types" : [
+            "name": "MGP",
+            "types": [
                 "StimeFabbisogno",
                 "LimitiTransito",
                 "PrezziConvenzionali",
@@ -24,8 +24,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI1",
-            "types" : [
+            "name": "MI1",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -33,8 +33,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI2",
-            "types" : [
+            "name": "MI2",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -42,8 +42,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI3",
-            "types" : [
+            "name": "MI3",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -51,8 +51,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI4",
-            "types" : [
+            "name": "MI4",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -60,8 +60,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI5",
-            "types" : [
+            "name": "MI5",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -69,8 +69,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI6",
-            "types" : [
+            "name": "MI6",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -78,8 +78,8 @@ class GMEDownloader:
             ]
         },
         {
-            "name" : "MI7",
-            "types" : [
+            "name": "MI7",
+            "types": [
                 "LimitiTransito",
                 "PrezziConvenzionali",
                 "Prezzi",
@@ -88,7 +88,7 @@ class GMEDownloader:
         }
     ]}
 
-    def get_everything_date(self, day : date, ignore_errors : bool = False):
+    def get_everything_date(self, day: date, ignore_errors: bool = False):
         '''
         Downloads everything from every known GME source for a given day.
 
@@ -127,9 +127,9 @@ class GMEDownloader:
         Returns:
             Retrieved XML file as a string.
         '''
-        return self.get_data("MGP",req_type, day)
+        return self.get_data("MGP", req_type, day)
 
-    def get_MI(self, number : int, req_type : str, day : date):
+    def get_MI(self, number: int, req_type: str, day: date):
         '''
         Downloads data from MI-number (1 to 7)
 
@@ -180,7 +180,9 @@ class GMEDownloader:
         response = session.post(url, data=post_data)
         if(response.status_code == 200):
             return response.text
-        raise ValueError("Required value could not be found ({}, {}, {})".format(category, req_type, day))
+        raise ValueError("Required value could not be found ({}, {}, {})".format(
+            category, req_type, day))
+
 
 downloader = GMEDownloader()
-print(downloader.get_everything_day(date(2020,4,11), ignore_errors=False))
+print(downloader.get_everything_date(date(2020, 4, 11), ignore_errors=False))
