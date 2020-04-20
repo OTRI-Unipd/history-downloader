@@ -1,92 +1,16 @@
 from datetime import date
+from pathlib import Path
+import json
 import requests
 
+DICTIONARY_PATH = Path("gme_data_dictionary.json")
 
 class GMEDownloader:
     '''
     Downloads all kind of data from https://www.mercatoelettrico.org/
     '''
 
-    DICTIONARY = {"categories": [
-        {
-            "name": "MGP",
-            "types": [
-                "StimeFabbisogno",
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Quantita",
-                "Liquidita",
-                "Transiti",
-                "Fabbisogno",
-                "OfferteIntegrativeGrtn",
-                "Prezzi",
-                "MarketCoupling"
-            ]
-        },
-        {
-            "name": "MI1",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI2",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI3",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI4",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI5",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI6",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        },
-        {
-            "name": "MI7",
-            "types": [
-                "LimitiTransito",
-                "PrezziConvenzionali",
-                "Prezzi",
-                "Quantita"
-            ]
-        }
-    ]}
+    DICTIONARY = json.load(DICTIONARY_PATH.open("r"))
 
     def get_everything_date(self, day: date, ignore_errors: bool = False):
         '''
