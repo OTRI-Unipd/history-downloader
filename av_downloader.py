@@ -10,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 import json
 
+TIME_ZONE_KEY = "6. Time Zone"
+
 class AVDownloader:
     '''
     '''
@@ -47,7 +49,8 @@ class AVDownloader:
         try:
             data, meta = self.ts.get_intraday(symbol, interval=interval, outputsize='full')
             # The meta retrieved here are not what we want
-            meta = {}
+            timezone = meta[TIME_ZONE_KEY]
+            meta = dict()
             meta['ticker'] = symbol
             meta['interval'] = interval
             meta['provider'] = "alpha vantage"
