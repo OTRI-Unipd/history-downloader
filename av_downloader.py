@@ -5,12 +5,11 @@ AVDownloader -- Download historical data from Alpha Vantage.
 Script:
 If main module then requests a key and symbol via user input and stores in a subdirectory of the module file's parent directory.
 '''
+from pytz import timezone
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
-from pytz import timezone
 from pathlib import Path
 import json
-import pytz
 
 GMT = timezone("GMT")
 TIME_ZONE_KEY = "6. Time Zone"
