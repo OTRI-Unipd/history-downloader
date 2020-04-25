@@ -7,14 +7,15 @@ If main module then requests a key and symbol via user input and stores in a sub
 '''
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
+from pytz import timezone
 from pathlib import Path
 import json
+import pytz
 
+GMT = timezone("GMT")
 TIME_ZONE_KEY = "6. Time Zone"
 
 class AVDownloader:
-    '''
-    '''
     def __init__(self, key : str, dir_path : Path):
         '''
         Init method.
@@ -50,7 +51,10 @@ class AVDownloader:
             data, meta = self.ts.get_intraday(symbol, interval=interval, outputsize='full')
             # The meta retrieved here are not what we want
             timezone = meta[TIME_ZONE_KEY]
+            # TODO format time in atoms instead of adding timezone field:
+            # TODO create dupe dict and copy the formatted keys (or you risk overlapping them when converting)
             meta = dict()
+            meta['timezone'] = timezone
             meta['ticker'] = symbol
             meta['interval'] = interval
             meta['provider'] = "alpha vantage"
@@ -60,6 +64,15 @@ class AVDownloader:
             return file_path
         except ValueError:
                 return None
+
+    @staticmethod
+    def __converto_to_gmt(datetime : str, zonename : str) -> datetime:
+        '''
+        # TODO: specs
+        '''
+        zone = timezone(zonename)
+        base = timezone.localize(datetime)
+        return base.astimezone(GMT)
 
 if __name__ == '__main__':
     dir_path = Path('/av_historical_1m')
