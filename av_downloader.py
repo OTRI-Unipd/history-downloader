@@ -78,7 +78,7 @@ class AVDownloader:
         '''
         Method to convert a datetime in a certain timezone to a GMT datetime
         Parameters:
-            date_time : datetime:
+            date_time : datetime
                 The datetime to convert
             zonename : str
                 The time zone's name
