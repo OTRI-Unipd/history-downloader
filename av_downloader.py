@@ -1,7 +1,6 @@
 '''
 Classes:
 AVDownloader -- Download historical data from Alpha Vantage.
-
 Script:
 If main module then requests a key and symbol via user input and stores in a subdirectory of the module file's parent directory.
 '''
@@ -33,7 +32,6 @@ class AVDownloader:
         Downloads data for a single symbol.
         Downloads the full record of the TimeSeries Alpha Vantage api and stores the result in a file, returning the output file.
         The name will be: 'symbol_interval.json'. Ignores a symbol that returns no data, and returns an empty string in that case.
-
         Parameters:
             symbol : str
                 The symbol for which to download data.
