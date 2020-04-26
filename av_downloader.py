@@ -1,24 +1,21 @@
 '''
 Classes:
 AVDownloader -- Download historical data from Alpha Vantage.
-
 Script:
 If main module then requests a key and symbol via user input and stores in a subdirectory of the module file's parent directory.
 '''
 from pytz import timezone
 from alpha_vantage.timeseries import TimeSeries
 from datetime import datetime
-from pytz import timezone
 from pathlib import Path
 import json
-import pytz
 
 GMT = timezone("GMT")
 TIME_ZONE_KEY = "6. Time Zone"
 
 
 class AVDownloader:
-    def __init__(self, key : str, dir_path : Path):
+    def __init__(self, key: str, dir_path: Path):
         '''
         Init method.
         Parameters:
@@ -35,7 +32,6 @@ class AVDownloader:
         Downloads data for a single symbol.
         Downloads the full record of the TimeSeries Alpha Vantage api and stores the result in a file, returning the output file.
         The name will be: 'symbol_interval.json'. Ignores a symbol that returns no data, and returns an empty string in that case.
-
         Parameters:
             symbol : str
                 The symbol for which to download data.
@@ -65,7 +61,6 @@ class AVDownloader:
                     ).strftime("%Y-%m-%d %H:%M:%S")
                 ] = v
             meta = dict()
-            meta['timezone'] = timezone
             meta['ticker'] = symbol
             meta['interval'] = interval
             meta['provider'] = "alpha vantage"
@@ -92,15 +87,6 @@ class AVDownloader:
         base = zone.localize(date_time)
         return base.astimezone(GMT)
 
-
-    @staticmethod
-    def __converto_to_gmt(datetime : str, zonename : str) -> datetime:
-        '''
-        # TODO: specs
-        '''
-        zone = timezone(zonename)
-        base = timezone.localize(datetime)
-        return base.astimezone(GMT)
 
 if __name__ == '__main__':
     dir_path = Path('/av_historical_1m')
